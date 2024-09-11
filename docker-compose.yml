@@ -8,20 +8,27 @@ services:
     volumes:
       - ./config:/etc/nginx
       - ./config/modules:/usr/lib/nginx/modules
-      #- /data/www/ssl:/etc/nginx/ssl
+      - /data/www/ssl:/etc/nginx/ssl
       - /data/www/html:/var/www/html
       - ./log:/var/log/nginx
     depends_on:
       - php-fpm
-    network_mode: bridge
-    restart: unless-stopped
+    #command: /bin/bash -c "/etc/nginx/update_resolvers.sh && /docker-entrypoint.sh nginx -g 'daemon off;'"
+    networks:
+      - nginx-web
+    restart: always
 
   php-fpm:
     image: php:8-fpm
-    container_name: php-fpm
+    container_name: nginx-php-fpm
     volumes:
       - /data/www/html:/var/www/html
       - ./config/php/custom_ini:/usr/local/etc/php/conf.d/custom.ini
-    network_mode: bridge
-    restart: unless-stopped
+    networks:
+      - nginx-web
+    restart: always
+networks:
+  nginx-web:
+    name: nginx-web
+    driver: bridge
 
